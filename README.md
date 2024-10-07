@@ -48,3 +48,5 @@ ln -s /path/to/weights weights
 - lightning
 - python-dotenv
 - umap-learn
+**pip**
+- torcheval
