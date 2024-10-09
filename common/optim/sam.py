@@ -39,7 +39,8 @@ def bypass_running_stats(model):
 
 
 class SAM(torch.optim.Optimizer):
-    # src: https://github.com/davda54/sam
+    # orig src: https://github.com/davda54/sam
+    # - modified to support torch.compile
     def __init__(self, params, base_optimizer, rho=0.05, adaptive=False, **kwargs):
         assert rho >= 0.0, f"Invalid rho, should be non-negative: {rho}"
 
@@ -59,7 +60,9 @@ class SAM(torch.optim.Optimizer):
             for p in group["params"]:
                 if p.grad is None:
                     continue
-                self.state[p]["old_p"] = p.clone()
+                if "old_p" not in self.state[p]:
+                    self.state[p]["old_p"] = torch.empty_like(p)
+                self.state[p]["old_p"].copy_(p)
                 e_w = (torch.pow(p, 2) if group["adaptive"] else 1.0) * p.grad * scale.to(p)
                 p.add_(e_w)  # climb to the local maximum "w + e(w)"
 
@@ -90,14 +93,13 @@ class SAM(torch.optim.Optimizer):
 
     def _grad_norm(self):
         shared_device = self.param_groups[0]["params"][0].device  # put everything on the same device, in case of model parallelism
-        norm = torch.norm(
-            torch.stack([
-                ((torch.abs(p) if group["adaptive"] else 1.0) * p.grad).norm(p=2).to(shared_device)
-                for group in self.param_groups for p in group["params"]
-                if p.grad is not None
-            ]),
-            p=2
-        )
+        norm_squares = []
+        for group in self.param_groups:
+            for p in group["params"]:
+                if p.grad is not None:
+                    grad = (torch.abs(p) if group["adaptive"] else 1.0) * p.grad
+                    norm_squares.append(torch.sum(grad ** 2).to(shared_device))
+        norm = torch.sqrt(torch.sum(torch.stack(norm_squares)))
         return norm
 
     def load_state_dict(self, state_dict):
