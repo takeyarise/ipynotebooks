@@ -2,11 +2,39 @@ import torch
 
 
 class AWP:
-    """
-    src: https://www.kaggle.com/code/junkoda/fast-awp
-    """
     def __init__(self, model, optimizer, *, adv_param='weight',
                  adv_lr=0.001, adv_eps=0.001):
+        """AWP
+
+        src: https://www.kaggle.com/code/junkoda/fast-awp
+
+        Parameters
+        ----------
+        model : _type_
+            _description_
+        optimizer : _type_
+            _description_
+        adv_param : str, optional
+            _description_, by default 'weight'
+        adv_lr : float, optional
+            _description_, by default 0.001
+        adv_eps : float, optional
+            _description_, by default 0.001
+
+        Example
+        -------
+        >>> awp = AWP(model, optimizer, adv_lr=0.001, adv_eps=0.001)
+        >>> awp_start = 1.0
+        >>> for epoch in range(epochs):
+        >>>     for x, y in enumerate(loader_train):
+        >>>         if epoch >= awp_start:
+        >>>             awp.perturb(input_ids, attention_mask, y, criterion)
+        >>>         y_pred = model(x)
+        >>>         loss = criterion(y_pred, y)
+        >>>         loss.backward()
+        >>>         awp.restore()
+        >>>         optimizer.zero_grad()
+        """
         self.model = model
         self.optimizer = optimizer
         self.adv_param = adv_param
@@ -14,7 +42,7 @@ class AWP:
         self.adv_eps = adv_eps
         self.backup = {}
 
-    def perturb(self, input_ids, attention_mask, token_type_ids, y, criterion):
+    def perturb(self, input_ids, attention_mask, y, criterion):
         """
         Perturb model parameters for AWP gradient
         Call before loss and loss.backward()

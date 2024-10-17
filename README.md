@@ -3,7 +3,14 @@ Jupyter Notebook Collections
 
 実験用
 
-**デバッグしていないものが多数**
+<details>
+<summary>memo</summary>
+
+**common.optim 関連**
+- `common/optim/asam.py` は元のまま
+- `common/optim/ranger21.py` は試していない
+
+</details>
 
 ## directory
 
@@ -47,6 +54,8 @@ ln -s /path/to/weights weights
 - rich
 - lightning
 - python-dotenv
+- scikit-learn
 - umap-learn
+- torchinfo
 **pip**
 - torcheval

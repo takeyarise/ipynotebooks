@@ -4,6 +4,31 @@ from collections import defaultdict
 
 class ASAM:
     def __init__(self, optimizer, model, rho=0.5, eta=0.01):
+        """__init__ _summary_
+
+        Parameters
+        ----------
+        optimizer : _type_
+            _description_
+        model : _type_
+            _description_
+        rho : float, optional
+            _description_, by default 0.5
+        eta : float, optional
+            _description_, by default 0.01
+
+        Example
+        -------
+        >>> ### in train step ###
+        >>> # Ascent Step
+        >>> predictions = model(inputs)
+        >>> batch_loss = criterion(predictions, targets)
+        >>> batch_loss.mean().backward()
+        >>> minimizer.ascent_step()
+        >>> # Descent Step
+        >>> criterion(model(inputs), targets).mean().backward()
+        >>> minimizer.descent_step()
+        """
         self.optimizer = optimizer
         self.model = model
         self.rho = rho
@@ -50,6 +75,29 @@ class ASAM:
 
 class SAM(ASAM):
     def __init__(self, optimizer, model, rho=0.05):
+        """__init__ _summary_
+
+        Parameters
+        ----------
+        optimizer : _type_
+            _description_
+        model : _type_
+            _description_
+        rho : float, optional
+            _description_, by default 0.5
+
+        Example
+        -------
+        >>> ### in train step ###
+        >>> # Ascent Step
+        >>> predictions = model(inputs)
+        >>> batch_loss = criterion(predictions, targets)
+        >>> batch_loss.mean().backward()
+        >>> minimizer.ascent_step()
+        >>> # Descent Step
+        >>> criterion(model(inputs), targets).mean().backward()
+        >>> minimizer.descent_step()
+        """
         super().__init__(optimizer, model, rho, 0)
 
     @torch.no_grad()
